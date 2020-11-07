@@ -278,7 +278,7 @@ ln -s ~/.emacs.d/.emacs
 #+BEGIN_SRC emacs-lisp
   (setq-default truncate-lines t)
 #+END_SRC
-  Don't use tabs. Manually insert tab with C-qC-i
+  Don't use tabs. Manually insert tab with =C-qC-i=
 #+BEGIN_SRC emacs-lisp
   (setq-default indent-tabs-mode nil)
 #+END_SRC
