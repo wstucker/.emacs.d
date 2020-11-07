@@ -303,8 +303,7 @@ ln -s ~/.emacs.d/.emacs
   (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 ** Fat Finger Prevention
-   Ask before actually closing. I've accidentally closed way too many times.
-   FIXME convert this to advice?
+   I've accidentally closed way too many times; confirm before actually closing. 
 #+BEGIN_SRC emacs-lisp
   (defun prompt-before-closing ()
     "Double check before actually closing."
