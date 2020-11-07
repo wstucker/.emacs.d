@@ -9,8 +9,8 @@ ln -s ~/.emacs.d/.emacs
    On first run, several package will not be installed. 
 *** Install packages by doing =M-x package-list-packages=
 *** For each package to install, go to appropriate line and mark by hitting =i=
-    zenburn-theme
-    yasnippet
+**** zenburn-theme
+**** yasnippet
 *** Install by hitting =x=
 *** Restart emacs
 ** Submodule Setup
