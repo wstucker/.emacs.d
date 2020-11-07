@@ -1,0 +1,10 @@
+/.org-id-locations
+/settings.org~
+/auto-save-list/
+tramp
+settings.el
+eshell/
+elpa/
+url/
+recentf*
+session*

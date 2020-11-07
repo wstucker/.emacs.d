@@ -1,0 +1,3 @@
+[submodule "qgrep"]
+	path = qgrep
+	url = https://github.com/wstucker/qgrep.git

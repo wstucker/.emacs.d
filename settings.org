@@ -1,0 +1,340 @@
+#+TITLE: William Stucker's Emacs Configuration
+* Setup
+  Clone this repository in the the ~/.emacs.d directory.
+  Then create a symbolic link to ~/.emacs.d/.emacs.
+#+BEGIN_SRC bash
+ln -s ~/.emacs.d/.emacs
+#+END_SRC
+* Packages
+#+BEGIN_SRC emacs-lisp
+  (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                           ("melpa" . "http://melpa.org/packages/")))
+  (let ((default-directory "~/.emacs.d/elpa/"))
+    (normal-top-level-add-to-load-path '("."))
+    (normal-top-level-add-subdirs-to-load-path))
+  (package-initialize)
+#+END_SRC
+* Library Loading
+  If running on MacOS, add more paths to PATH to get brew installed tools.
+#+BEGIN_SRC emacs-lisp
+  (when (eq system-type 'darwin)
+    (setenv "PATH" (concat "/usr/local/bin:" (getenv "PATH")))
+    (setq exec-path (append '("/usr/local/bin") exec-path)))
+#+END_SRC
+* Visual Appearance
+** Keep it simple
+#+BEGIN_SRC emacs-lisp
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
+(setq inhibit-splash-screen t)
+#+END_SRC
+** Colors
+ #+BEGIN_SRC emacs-lisp
+   (load-theme 'zenburn t)
+#+END_SRC
+** Window Sizing
+   Prevent emacs from create tons of new windows when on a 4k screen.
+#+BEGIN_SRC emacs-lisp
+  (setq split-height-threshold nil)
+  (setq split-width-threshold nil)
+#+END_SRC
+** Modeline
+   Display date and time in status bar
+#+BEGIN_SRC emacs-lisp
+  (setq display-time-day-and-date t
+       display-time-24hr-format t)
+  (display-time)
+#+END_SRC
+   Dipslay column in modeline
+#+BEGIN_SRC emacs-lisp
+  (setq-default column-number-mode t)
+#+END_SRC
+** Maximize
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+#+END_SRC
+* Spelling
+#+BEGIN_SRC emacs-lisp
+;  (setq ispell-program-name "aspell")
+  (defun ispell-line ()
+    "Ispell a single line" ; Useful for doing commit messages
+    (interactive)
+    (save-excursion
+      (end-of-line)
+      (let ((end (point)))
+        (beginning-of-line)
+        (let ((beg (point)))
+          (ispell-region beg end)))))
+  (global-set-key (kbd "\C-c l") 'ispell-line)
+#+END_SRC
+* Movement
+** Window Cycling
+   Allow forwards and backwards movement.
+#+BEGIN_SRC emacs-lisp
+  (defun select-next-window ()
+   "Switch to the next window"
+   (interactive)
+   (select-window (next-window)))
+
+  (defun select-previous-window ()
+   "Switch to the previous window"
+   (interactive)
+   (select-window (previous-window)))
+
+  (global-set-key (kbd "\C-x o") 'select-next-window)
+  (global-set-key (kbd "\C-x i")  'select-previous-window)
+#+END_SRC
+* Search & Grep
+  Swap incremental search keys with regex isearch keys
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "\C-s") 'isearch-forward-regexp)
+  (global-set-key (kbd "\C-r") 'isearch-backward-regexp)
+  (global-set-key [(control meta s)] 'isearch-forward)
+  (global-set-key [(control meta r)] 'isearch-backward)
+#+END_SRC
+** qgrep
+   Custom package for quickly grepping at point.
+#+BEGIN_SRC emacs-lisp
+  (let ((default-directory "~/.emacs.d/qgrep/"))
+    (normal-top-level-add-to-load-path '("."))
+    (normal-top-level-add-subdirs-to-load-path))
+
+  (autoload 'qgrep "qgrep" "Quick grep" t)
+  (autoload 'qgrep-no-confirm "qgrep" "Quick grep" t)
+  (autoload 'qgrep-confirm "qgrep" "Quick grep" t)
+  (global-set-key (kbd "\C-c g") 'qgrep-no-confirm)
+  (global-set-key (kbd "\C-c G") 'qgrep-confirm)
+  ;; Stricter filters
+  (setq qgrep-default-find "find . \\(  -wholename '*/.git' \\) -prune -o -type f \\( '!' -name '*.drawio' -a \\( '!' -name '*~' \\) -a \\( '!' -name '#*#' \\) -a \\( -name '*' \\) \\) -type f -print0")
+  (setq qgrep-default-grep "grep -iI -nH -e \"%s\"")
+#+END_SRC
+** Occur mode
+   Keep old occur buffers around by default.
+#+BEGIN_SRC emacs-lisp
+    (defadvice occur (after rename-buf activate)
+      "Rename the occur buffer to be unique."
+      (save-excursion
+        (when (get-buffer "*Occur*")
+          (with-current-buffer "*Occur*"
+            (forward-line 0)
+            (let ((line (thing-at-point 'line))
+                  (search)
+                  (buffer))
+              (string-match "for \"\\(.*\\)\" in buffer: \\(.*\\)" line)
+              (setq search (match-string 1 line))
+              (setq buffer (match-string 2 line))
+              (rename-buffer (format "*Occur: %s:\"%s\"*" buffer search)))))))
+    (ad-activate 'occur)
+#+END_SRC
+* ediff
+  I prefer to have a single frame with a/b/merge/control windows.
+#+BEGIN_SRC emacs-lisp
+(setq ediff-split-window-function 'split-window-horizontally)
+(setq ediff-diff-options "-w")
+(setq ediff-control-frame-upward-shift 40)
+(setq ediff-narrow-control-frame-leftward-shift -30)
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+#+END_SRC
+* org
+  Keep org configuration in a separate repository so it can be machine
+  specific.
+#+BEGIN_SRC emacs-lisp
+  (let ((org-config-file "~/org/.configuration.el"))
+    (when (file-exists-p org-config-file)
+      (load-file org-config-file)))
+#+END_SRC
+* dired 
+  Get directory mode to display human readable sizes
+#+BEGIN_SRC emacs-lisp
+  (setq dired-listing-switches "-alh")
+#+END_SRC
+* shell-mode
+** Allow jumping to bookmarks inside shell-mode
+#+BEGIN_SRC emacs-lisp
+  (require 'bookmark)
+  (defun bookmark-shell-jump (bookmark &optional display-func)
+    "Allow emacs bookmarks to do a 'cd directory' if in shell mode"
+    (interactive
+     (list (bookmark-completing-read "Jump to bookmark"
+                                     bookmark-current-bookmark)))
+    (unless bookmark
+      (error "No bookmark specified"))
+    (if (eq major-mode 'shell-mode)
+        (progn
+          (goto-char (point-max))
+          (comint-previous-prompt 1)
+          (comint-next-prompt 1)
+          (let* ((bookmark-data (bookmark-get-bookmark-record bookmark))
+                 (filename (cdr (assoc 'filename bookmark-data))))
+            (insert (format "cd %s" filename))
+            (comint-send-input)))
+      (bookmark-jump bookmark)))
+  (global-set-key (kbd "C-x r b") 'bookmark-shell-jump)
+  (global-set-key (kbd "C-x r B") 'bookmark-jump)
+#+END_SRC
+** Clear the shell
+   Running 'clear' command in *shell* mode doesn't flush the buffer.
+#+BEGIN_SRC emacs-lisp
+  (defun cs ()
+    (interactive)
+    (let ((old-max comint-buffer-maximum-size))
+      (setq current_line (line-number-at-pos)
+            max_lines (line-number-at-pos (point-max)))
+      (setq comint-buffer-maximum-size (- max_lines current_line))
+      (comint-truncate-buffer)
+      (setq comint-buffer-maximum-size old-max)))
+#+END_SRC
+** Fix window behavior
+   Open shell buffers in the current window to avoid changing the window
+   layout.
+#+BEGIN_SRC emacs-lisp
+  (require 'shell)
+  (defun shell (&optional buffer)
+    "There doesn't seem to be an easier way to override the window behavior of shell mode."
+    (interactive
+     (list
+      (and current-prefix-arg
+           (prog1
+               (read-buffer "Shell buffer: "
+                            (generate-new-buffer-name "*shell*"))
+             (if (file-remote-p default-directory)
+                 ;; It must be possible to declare a local default-directory.
+                 (setq default-directory
+                       (expand-file-name
+                        (read-file-name
+                         "Default directory: " default-directory default-directory
+                         t nil 'file-directory-p))))))))
+    (require 'ansi-color)
+    (setq buffer (get-buffer-create (or buffer "*shell*")))
+    ;; Pop to buffer, so that the buffer's window will be correctly set
+    ;; when we call comint (so that comint sets the COLUMNS env var properly).
+                                          ;(pop-to-buffer buffer)
+                                          ; WRS change window behavior to open in current window
+    (switch-to-buffer buffer)  
+    (unless (comint-check-proc buffer)
+      (let* ((prog (or explicit-shell-file-name
+                       (getenv "ESHELL") shell-file-name))
+             (name (file-name-nondirectory prog))
+             (startfile (concat "~/.emacs_" name))
+             (xargs-name (intern-soft (concat "explicit-" name "-args"))))
+        (unless (file-exists-p startfile)
+          (setq startfile (concat user-emacs-directory "init_" name ".sh")))
+        (apply 'make-comint-in-buffer "shell" buffer prog
+               (if (file-exists-p startfile) startfile)
+               (if (and xargs-name (boundp xargs-name))
+                   (symbol-value xargs-name)
+                 '("-i")))
+        (shell-mode)))
+    buffer)
+#+END_SRC
+** Hotkeys
+   Make shortcuts to quick access to multiple shells.
+#+BEGIN_SRC emacs-lisp
+  (global-set-key [f1] (lambda () (interactive) (shell "*shell*")))
+  (global-set-key [f2] (lambda () (interactive) (shell "*shell*<2>")))
+  (global-set-key [f3] (lambda () (interactive) (shell "*shell*<3>")))
+  (global-set-key [f4] (lambda () (interactive) (shell "*shell*<4>")))
+#+END_SRC
+** Misc settings
+   Fix junk characters in shell-mode caused by terminal coloring
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'shell-mode-hook
+            'ansi-color-for-comint-mode-on)
+#+END_SRC
+* Buffers
+  Occur mode has been configured to create many buffers and qgrep creates a
+  buffer per search by default. Make an easy way to clean up many buffers at
+  once.
+#+BEGIN_SRC emacs-lisp
+  (defun kill-buffer-regexp (regexp)
+    "Kill all buffers matching REGEXP"
+    (save-excursion
+      (mapc (lambda (x)
+              (if (string-match regexp (buffer-name x))
+                  (kill-buffer x)))
+            (buffer-list))))
+#+END_SRC
+* Misc
+  Make the font size a bit smaller.
+#+BEGIN_SRC emacs-lisp
+  ;(set-face-attribute 'default nil :height 90)
+#+END_SRC
+  Enable parenthesis matching.
+#+BEGIN_SRC emacs-lisp
+  (show-paren-mode 1)
+#+END_SRC
+  Always truncate lines.
+#+BEGIN_SRC emacs-lisp
+  (setq-default truncate-lines t)
+#+END_SRC
+  Don't use tabs. Manually insert tab with C-qC-i
+#+BEGIN_SRC emacs-lisp
+  (setq-default indent-tabs-mode nil)
+#+END_SRC
+  Assuming line length is 80, set the fill target length to 79
+#+BEGIN_SRC emacs-lisp
+  (setq-default fill-column 79)
+#+END_SRC
+  Find file at point
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "\C-c w") 'find-file-at-point)
+#+END_SRC
+  Use system copy/paste.
+#+BEGIN_SRC emacs-lisp
+  (setq x-select-enable-clipboard t)
+#+END_SRC
+  Enable narrowing.
+#+BEGIN_SRC emacs-lisp
+  (put 'narrow-to-region 'disabled nil)
+#+END_SRC
+  Too lazy to type all of these characters out:
+#+BEGIN_SRC emacs-lisp
+  (fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+** Fat Finger Prevention
+   Ask before actually closing. I've accidentally closed way too many times.
+   FIXME convert this to advice?
+#+BEGIN_SRC emacs-lisp
+  (defun prompt-before-closing ()
+    "Double check before actually closing."
+    (interactive)
+    (if (y-or-n-p (format "Are you sure you want to exit Emacs? "))
+        (if (< emacs-major-version 22)
+            (save-buffers-kill-terminal)
+          (save-buffers-kill-emacs))
+      (message "Canceled exit")))
+  (global-set-key (kbd "C-x C-c") 'prompt-before-closing)
+#+END_SRC
+   Disable C-z. This is used as my tmux prefix.
+#+BEGIN_SRC emacs-lisp
+  (global-unset-key "\C-z")
+#+END_SRC
+* Snippets
+(setq yas-prompt-functions (remove 'yas-dropdown-prompt yas-prompt-functions))
+(setq yas-prompt-functions (remove 'yas-x-prompt yas-prompt-functions))
+* Uniquify
+Rename buffers uniquely based on directory name if they have the same file name.
+This is useful if many files in the project have the same filename (e.g. Makefile).
+#+BEGIN_SRC emacs-lisp
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+;(setq uniquify-separator "/")
+(setq uniquify-after-kill-buffer-p t)    ; rename after killing uniquified
+(setq uniquify-ignore-buffers-re "^\\*") ; don't muck with special buffers
+#+END_SRC
+* Bazel
+  Skylark's syntax is a subset of python. Use the python-mode as good enough
+  for formatting.
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.bzl\\'" . python-mode))
+  (add-to-list 'auto-mode-alist '("\\BUILD\\'" . python-mode))
+#+END_SRC
+* Comma Indent
+#+BEGIN_SRC emacs-lisp
+  (defun align-comma (BEG END)
+    "Align a set of rows by comma. Frequently used for testplans or csv"
+    (interactive "r")
+    (align-regexp BEG END " *\\(, *\\)" 1 2 t))
+#+END_SRC
