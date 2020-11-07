@@ -56,7 +56,7 @@ ln -s ~/.emacs.d/.emacs
        display-time-24hr-format t)
   (display-time)
 #+END_SRC
-   Dipslay column in modeline
+   Display column in modeline
 #+BEGIN_SRC emacs-lisp
   (setq-default column-number-mode t)
 #+END_SRC
