@@ -13,7 +13,13 @@ ln -s ~/.emacs.d/.emacs
     yasnippet
 *** Install by hitting =x=
 *** Restart emacs
-#+END_QUOTE
+** Submodule Setup
+   The qgrep package is install by source as a submodule.
+#+BEGIN_SRC bash
+cd ~/.emacs.d
+git submodule init
+git submodule update 
+#+END_SRC
 * Packages
 #+BEGIN_SRC emacs-lisp
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
