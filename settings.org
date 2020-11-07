@@ -44,7 +44,7 @@ ln -s ~/.emacs.d/.emacs
    (load-theme 'zenburn t)
 #+END_SRC
 ** Window Sizing
-   Prevent emacs from create tons of new windows when on a 4k screen.
+   Prevent emacs from creating excessive new windows when on a high resolution screen.
 #+BEGIN_SRC emacs-lisp
   (setq split-height-threshold nil)
   (setq split-width-threshold nil)
