@@ -10,6 +10,7 @@ ln -s ~/.emacs.d/.emacs
 *** Install packages by doing `M-x package-list-packages`
 *** For each package to install, go to appropriate line and mark by hitting 'i'
     zenburn-theme
+    yasnippet
 *** Install by hitting 'x'
 *** Restart emacs
 #+END_QUOTE
@@ -320,8 +321,11 @@ ln -s ~/.emacs.d/.emacs
   (global-unset-key "\C-z")
 #+END_SRC
 * Snippets
-(setq yas-prompt-functions (remove 'yas-dropdown-prompt yas-prompt-functions))
-(setq yas-prompt-functions (remove 'yas-x-prompt yas-prompt-functions))
+#+BEGIN_SRC emacs-lisp
+  (require 'yasnippet)
+  (setq yas-prompt-functions (remove 'yas-dropdown-prompt yas-prompt-functions))
+  (setq yas-prompt-functions (remove 'yas-x-prompt yas-prompt-functions))
+#+END_SRC
 * Uniquify
 Rename buffers uniquely based on directory name if they have the same file name.
 This is useful if many files in the project have the same filename (e.g. Makefile).
