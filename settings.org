@@ -7,11 +7,11 @@ ln -s ~/.emacs.d/.emacs
 #+END_SRC
 ** Package installation
    On first run, several package will not be installed. 
-*** Install packages by doing `M-x package-list-packages`
-*** For each package to install, go to appropriate line and mark by hitting 'i'
+*** Install packages by doing =M-x package-list-packages=
+*** For each package to install, go to appropriate line and mark by hitting =i=
     zenburn-theme
     yasnippet
-*** Install by hitting 'x'
+*** Install by hitting =x=
 *** Restart emacs
 #+END_QUOTE
 * Packages
