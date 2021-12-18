@@ -168,8 +168,9 @@ git submodule update
 * shell-mode
 ** Default to zsh on mac now
 #+BEGIN_SRC emacs-lisp
-  (setq shell-file-name "/bin/zsh")
-  (setq explicit-shell-file-name "/bin/zsh")
+  (when (eq system-type 'darwin)
+    (setq shell-file-name "/bin/zsh")
+    (setq explicit-shell-file-name "/bin/zsh"))
 #+END_SRC
 ** Allow jumping to bookmarks inside shell-mode
 #+BEGIN_SRC emacs-lisp
